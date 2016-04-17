@@ -1,5 +1,5 @@
 #custom ignore
-cfg.* #has oauth2 info
+config/ #has oauth2 info
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
