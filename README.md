@@ -7,7 +7,7 @@ cfg.py exists in the same directory and is called via import cfg to utilize the 
     PORT = 6667
     NICK = "BOT_USERNAME"
     PASS = "oauth:abc1234515314532" #chat_login scope at least
-    CHANNEL = "#riotgames" #channel of interest
+    CHANNEL = ("#riotgames","#imaqtpie") #channels of interest
     RATE = (10/30)
     client_id = "client_id"
     client_secret = "client_secret" #todo use for looking up channel info to determine game being played
