@@ -13,8 +13,10 @@ def socket_start():
 	s.connect((cfg.HOST,cfg.PORT))
 	s.send("PASS {}\r\n".format(cfg.PASS).encode("utf-8"))
 	s.send("NICK {}\r\n".format(cfg.NICK).encode("utf-8"))
-	s.send("JOIN {}\r\n".format(cfg.CHANNEL).encode("utf-8"))
+	for chn in cfg.CHANNEL:
+		s.send("JOIN {}\r\n".format(chn).encode("utf-8"))
 
+	channelIndex = len(cfg.CHANNEL)-1
 	print("Entering prep loop")
 	while True:
 		response = s.recv(1024).decode("utf-8") #check our socket for data
@@ -22,7 +24,8 @@ def socket_start():
 		if response == "PING :tmi.twitch.tv\r\n":
 			s.send("PONG :tmi.twitch.tv\r\n".encode("utf-8")) #respond to PINGs with PONG to keep the socket alive
 			print("Pong!")
-		elif re.search("End of /NAMES list",response):
+		#wait until we get an End of /NAMES list response for our channels
+		elif re.search(cfg.CHANNEL[channelIndex] + " :End of /NAMES list",response):
 			print("Entering main loop and beginning logging...")
 			break
 	return s
@@ -81,12 +84,17 @@ while True:
 					username = re.search(r"\w+", msg).group(0) # return the entire match
 				else:
 					username = "unknown"
+				if re.search(r"#\w+",msg):
+					channel = re.search(r"#\w+",msg).group(0)
+				else:
+					channel = "unknown"
 				message = CHAT_MSG.sub("", msg)
-				message = re.sub('(\t|\r|\n)+','',message)
+				message = re.sub('(\t|\r|\n)+','',message) #kill off pesky whitespace
 				if message != "": #we get some empty strings from newline splitting
 					# id | username | message | channel | game | create_dt
-					db_record = (username, message, cfg.CHANNEL,"League of Legends")
+					db_record = (username, message, channel,"League of Legends")
 					db_write(con,db_record)
+					#print(db_record) #for testing
 					if i % 250 == 0:
 						print('Still have non-empty messages: ' + username + ':' + message)
 			if response == "" and j > 10:
